@@ -6,10 +6,11 @@ import { useTheme } from 'styled-components'
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 
-const { Navigator, Screen } = createBottomTabNavigator();
-
 import { Dashboard } from '../pages/Dashboard';
-import { Register } from '../pages/Register'
+import { Register } from '../pages/Register';
+import { Overview } from '../pages/Overview'
+
+const { Navigator, Screen } = createBottomTabNavigator();
 
 export function AppRoutes() {
     const theme = useTheme();
@@ -22,7 +23,7 @@ export function AppRoutes() {
                 tabBarInactiveTintColor: theme.colors.text,
                 tabBarLabelPosition: "beside-icon",
                 tabBarStyle: {
-                    height: 88,
+                    height: Platform.OS === "ios" ? 88 : 68,
                     paddingVertical: Platform.OS === "ios" ? 20 : 0
                 } 
             }}
@@ -54,8 +55,8 @@ export function AppRoutes() {
                 }}
             />
             <Screen
-                name="Resume"
-                component={Register}
+                name="Overview"
+                component={Overview}
                 options= {{
                     tabBarIcon: (({ size, color}) => 
                     <MaterialIcons 

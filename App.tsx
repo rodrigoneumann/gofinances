@@ -1,6 +1,11 @@
 import React from 'react';
+import { StatusBar } from "react-native"
 import AppLoading from 'expo-app-loading';
 import { ThemeProvider } from 'styled-components'
+import 'intl';
+import 'intl/locale-data/jsonp/en-GB'
+
+import { AuthContext } from "./src/AuthContext";
 
 import {
   useFonts,
@@ -13,6 +18,7 @@ import theme from './src/global/styles/theme'
 
 import { NavigationContainer } from '@react-navigation/native'
 import { AppRoutes } from './src/routes/app.routes';
+import { SignIn } from './src/pages/SignIn';
 
 
 export default function App() {
@@ -28,8 +34,12 @@ export default function App() {
 
   return (
     <ThemeProvider theme={theme}>
-        <NavigationContainer> 
-          <AppRoutes />
+        <NavigationContainer>
+          <StatusBar barStyle='light-content'/>
+          <AuthContext.Provider value={[]}> 
+            <SignIn />
+          </AuthContext.Provider>
+          {/* <AppRoutes /> */}
         </NavigationContainer>
     </ThemeProvider>
   )
