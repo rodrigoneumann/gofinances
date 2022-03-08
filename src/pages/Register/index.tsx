@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { useForm } from 'react-hook-form'; 
 import { useNavigation } from '@react-navigation/native'
+import { useAuth } from "../../hooks/auth";
 
 import { 
     Container,
@@ -58,6 +59,8 @@ export function Register(){
     const [transactionType, setTransactionType] = useState('')
     const [categoryModalOpen, setCategoryModalOpen] = useState(false)
     
+    const { user } = useAuth();
+
     const [category, setCategory] = useState({
         key: 'category',
         name: 'Category',
@@ -73,15 +76,6 @@ export function Register(){
     } = useForm({
         resolver: yupResolver(schema)
     });
-
-    // const dataKey = '@gofinances:transactions'
-
-    // useEffect(() => {
-    //     async function loadData() {
-    //         await AsyncStorage.removeItem(dataKey)
-    //     }
-    //     loadData() 
-    // }, [])
 
     function handleTransactionTypeButtonSelect(type: 'positive' | 'negative') {
         setTransactionType(type)
@@ -111,7 +105,7 @@ export function Register(){
         }
 
         try {
-        const dataKey = '@gofinances:transactions'
+        const dataKey = `@gofinances:transactions_user:${user.id}`
         const data = await AsyncStorage.getItem(dataKey);
         const currentData = data ? JSON.parse(data) : [];
         
@@ -141,7 +135,8 @@ export function Register(){
         <GestureHandlerRootView style={{ flex: 1}}>
             <TouchableWithoutFeedback
                 onPress={Keyboard.dismiss}
-                style={{ height: "100%" }}
+                containerStyle={{ flex: 1}}
+                style={{ flex: 1 }}
             >
                 <Container>
                     <Header>

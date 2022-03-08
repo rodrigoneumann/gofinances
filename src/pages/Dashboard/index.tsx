@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { useTheme } from 'styled-components'
 import { useFocusEffect } from '@react-navigation/native'
+import { useAuth } from '../../hooks/auth';
 
 import { HighlightCard } from '../../components/HighlightCard';
 import { TransactionCard, TransactionCardProps } from '../../components/TransactionCard';
@@ -47,14 +48,21 @@ export function Dashboard() {
     const [highLightData, setHighlightData] = useState<HightLightData>({} as HightLightData);
 
     const theme = useTheme();
+    const { SignOut, user } = useAuth();
 
     function getLastTransactionDate(
         collection: DataListProps[],
         type: 'positive' | 'negative'
     ) {
-        const lastTransaction = new Date(Math.max.apply( Math, collection
-            .filter(
-            transaction => transaction.type === type)
+        const collectionFiltered = collection
+        .filter(transaction => transaction.type === type)
+
+        if(collectionFiltered.length === 0) {
+            return 0;
+        }
+
+        const lastTransaction = new Date(Math.max.apply( Math,
+            collectionFiltered
             .map(
             transaction => new Date(transaction.date).getTime())))
         
@@ -62,7 +70,7 @@ export function Dashboard() {
     }
 
     async function loadTransactions() {
-        const dataKey = '@gofinances:transactions';
+        const dataKey = `@gofinances:transactions_user:${user.id}`;
         const response = await AsyncStorage.getItem(dataKey)
         const transactions = response ? JSON.parse(response) : [];
 
@@ -105,7 +113,9 @@ export function Dashboard() {
 
         const lastEarnings = getLastTransactionDate(transactions, "positive");
         const lastExpenses = getLastTransactionDate(transactions, "negative");
-        const totalInterval = `01 to ${lastExpenses}`;
+        const totalInterval = lastExpenses === 0 
+            ? "There is no transaction registered"
+            :`01 to ${lastExpenses}`;
         
         const total = earningsTotal - expensesTotal;
 
@@ -115,14 +125,18 @@ export function Dashboard() {
                     style: 'currency',
                     currency: 'GBP'
                 }),
-                lastTransaction: `Last transaction ${lastEarnings}`
+                lastTransaction: lastEarnings === 0 
+                ? "There is no transaction registered" 
+                :`Last transaction ${lastEarnings}`
             },
             expenses: {
                 amount: expensesTotal.toLocaleString('en-GB', {
                     style: 'currency',
                     currency: 'GBP'
                 }),
-                lastTransaction: `Last transaction ${lastExpenses}`
+                lastTransaction: lastExpenses === 0
+                ? "There is no transaction registered"
+                :`Last transaction ${lastExpenses}`
             },
             total: {
                 amount: total.toLocaleString('en-GB', {
@@ -136,8 +150,6 @@ export function Dashboard() {
     }
 
     useEffect(() => {
-        // const dataKey = '@gofinances:transactions';
-        // AsyncStorage.removeItem(dataKey)
         loadTransactions()
     }, []);
 
@@ -159,13 +171,13 @@ export function Dashboard() {
                     <Header>
                         <UserWrapper>
                             <UserInfo>
-                                <Photo source={{uri: 'https://avatars.githubusercontent.com/u/6933796?v=4'}}/>
+                                <Photo source={{uri: user.photo}}/>
                                 <User>
                                     <UserGreeting>Hi,</UserGreeting>
-                                    <UserName>Rodrigo</UserName>
+                                    <UserName>{user.name}</UserName>
                                 </User>
                             </UserInfo>
-                            <LogoutButton>
+                            <LogoutButton onPress={SignOut}>
                                 <Icon name='power'/>
                             </LogoutButton>
                         </UserWrapper>

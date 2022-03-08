@@ -21,6 +21,7 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs"
 import { useTheme } from "styled-components"
+import { useAuth } from "../../hooks/auth";
 
 import { HistoryCard } from "../../components/HistoryCard";
 import { categories } from "../../utils/categories";
@@ -52,6 +53,8 @@ export function Overview() {
 
     const theme = useTheme();
 
+    const { user } = useAuth();
+
     function handleDateChange( action: 'next' | 'prev') {
         if(action === 'next') {
             setSelectDate(addMonths(selectedDate, 1));            
@@ -62,7 +65,7 @@ export function Overview() {
 
     async function loadData() {
         setIsLoading(true);
-        const dataKey = '@gofinances:transactions'
+        const dataKey = `@gofinances:transactions_user:${user.id}`
         const response = await AsyncStorage.getItem(dataKey);
         const responseFormatted = response ? JSON.parse(response) : [];
 
